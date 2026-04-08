@@ -35,9 +35,15 @@ https://www.seeedstudio.com/Seeed-XIAO-RP2350-p-5944.html
 
 ## Hook Up the Micro-Controller to the Addressable LEDs
 
-Here is a picture of how you hook up the addressable LEDs to the Raspberry Pi Pico 2 or Pico 2W, as the have the same 40 pin layout. It is a pretty simple connection, as a 200-400 Ohm resistor is needed on the line, in series. 
+Here is a picture of how you hook up the addressable LEDs to the Raspberry Pi Pico 2 or Pico 2W, as the have the same 40 pin layout. It is a pretty simple connection, as a 200-400 Ohm resistor is needed on the line, in series. See the link above, for the Seeed Pico 2. 
 
 <img width="1440" height="1080" alt="wiring" src="https://github.com/user-attachments/assets/12dcbeb5-3992-481f-b8fa-66f1ecced690" />
+
+ALED Strip Connections, unless Changed and Re-compiled.
+- First Strip - GPIO2
+- Second Strip - GPIO3
+- Third Strip - GPIO4
+- Fourth Strip - GPIO5
 
 What about a level shifter? Looking at the WS2812B datasheet, the VIH is 0.7V. That means 0.7V or higher is high, or a logic 1. With the VIH set that low, a 1.8V micro-controller can drive the signal, but not recommended.
 
