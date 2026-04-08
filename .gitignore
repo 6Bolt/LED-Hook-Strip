@@ -1,3 +1,9 @@
+#VSCode Stuff
+build
+!.vscode/*
+
+*.json
+
 # Prerequisites
 *.d
 
