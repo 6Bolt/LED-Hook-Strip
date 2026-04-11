@@ -30,7 +30,7 @@ CMAKE_MAKE_PROGRAM:FILEPATH=C:/Users/USERNAME/.pico-sdk/ninja/v1.12.1/ninja.exe
 
 Change out 'USERNAME' to your user name. As the Pico SDK gets installed into the Users files. 
 
-Link to Seeed Pico 2 Board, so you know where the GPIOs are.
+Link to Seeed Pico 2 Board (Seeed Xiao RP2350), so you know where the GPIOs are.
 https://www.seeedstudio.com/Seeed-XIAO-RP2350-p-5944.html
 
 ## Hook Up the Micro-Controller to the Addressable LEDs
@@ -44,6 +44,13 @@ ALED Strip Connections, unless Changed and Re-compiled.
 - Second Strip - GPIO3
 - Third Strip - GPIO4
 - Fourth Strip - GPIO5
+
+| GPIO | RPi Pico 2(W) | Seeed Xiao RP2350 |
+|------|---------------|--------------|
+| GPIO2 | Pin 4 | D8 |
+| GPIO3 | Pin 5 | D10 |
+| GPIO4 | Pin 6 | D9 |
+| GPIO5 | Pin 7 | D3 |
 
 What about a level shifter? Looking at the WS2812B datasheet, the VIH is 0.7V. That means 0.7V or higher is high, or a logic 1. With the VIH set that low, a 1.8V micro-controller can drive the signal, but not recommended.
 
