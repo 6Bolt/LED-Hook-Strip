@@ -62,3 +62,10 @@ Link to the WS2812B Datasheet, from Adafruit, who did the NeoPixel Interface
 https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
 
 Also, the interface is not running that fast. It is clock at 800KHz, which is a period of 1.25us. It is a single end data pin, that is a clock finder. Both logic 0 and 1, has a raising and failing edge. If no data is on the line, then it remains at logic 0. But if it was a differential signal, it would need the buffer at all, but would need 2 pins though, but can see why Adafruit designed it this way. Can see the timings in the datasheet. 
+
+### Connect Pico 2 to External Power Supply
+
+If you want to use the 5V power supply to power the Pico 2(W) board. Here is a wiring diagram of it. A diode is needed on the power line, to make sure it doesn’t pull power from the USB power. If you get a USB wire that the 5V power is not connected, or cut the power wire on the USB cord, then the diode is not needed. As there is no USB power connection to pull from. The ground is still needed, as USB2 still uses single ended receivers sometimes. But mostly it uses the differential receiver, which doesn’t use ground. So it might be doable, without the USB ground. 
+
+<img width="1440" height="1080" alt="wiring_external" src="https://github.com/user-attachments/assets/d9bfc17b-9231-4bcd-8845-acd3ab977a3d" />
+
