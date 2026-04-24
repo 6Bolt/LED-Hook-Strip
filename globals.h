@@ -61,7 +61,7 @@
 #define ALEDLATCHTIME       65
 
 // Time to Wait to Try to get Mutex Again
-#define MUTEXIRQWAIT        30 
+#define MUTEXIRQWAIT        20 
 
 // How Many Flash, Random Flash and Sequential Commands
 #define COMMANDMAX          10

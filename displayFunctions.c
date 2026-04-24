@@ -119,26 +119,37 @@ void DeinitLEDStrings(void)
 
 void UpdateDisplayNumber(uint8_t stringNum, uint16_t newDisplayNum)
 {
-    if (!gp_displayRangeInfo[stringNum].dataChanged)
+    if(newDisplayNum != gp_displayRangeInfo[stringNum].displayNumber)
     {
-        gp_displayRangeInfo[stringNum].dataChanged = true;
-        gp_displayRangeInfo[stringNum].oldDisplayNumber = gp_displayRangeInfo[stringNum].displayNumber;
-        gp_displayRangeInfo[stringNum].lastColor = gp_displayRangeInfo[stringNum].color;
-    }
-    gp_displayRangeInfo[stringNum].displayNumber = newDisplayNum;
+        if (!gp_displayRangeInfo[stringNum].dataChanged)
+        {
+            gp_displayRangeInfo[stringNum].dataChanged = true;
+            gp_displayRangeInfo[stringNum].oldDisplayNumber = gp_displayRangeInfo[stringNum].displayNumber;
+            gp_displayRangeInfo[stringNum].lastColor = gp_displayRangeInfo[stringNum].color;
+        }
+        gp_displayRangeInfo[stringNum].displayNumber = newDisplayNum;
 
-    DisplayDataOnLEDs(stringNum);
+        DisplayDataOnLEDs(stringNum);
+    }
+    else
+    {
+        gp_txData[stringNum].stringNumber = stringNum;
+        LatchString((alarm_id_t)0, &gp_txData[stringNum]);
+    }
 }
 
 void UpdateJustDisplayNumber(uint8_t stringNum, uint16_t newDisplayNum)
 {
-    if (!gp_displayRangeInfo[stringNum].dataChanged)
+    if(newDisplayNum != gp_displayRangeInfo[stringNum].displayNumber)
     {
-        gp_displayRangeInfo[stringNum].dataChanged = true;
-        gp_displayRangeInfo[stringNum].oldDisplayNumber = gp_displayRangeInfo[stringNum].displayNumber;
-        gp_displayRangeInfo[stringNum].lastColor = gp_displayRangeInfo[stringNum].color;
+        if (!gp_displayRangeInfo[stringNum].dataChanged)
+        {
+            gp_displayRangeInfo[stringNum].dataChanged = true;
+            gp_displayRangeInfo[stringNum].oldDisplayNumber = gp_displayRangeInfo[stringNum].displayNumber;
+            gp_displayRangeInfo[stringNum].lastColor = gp_displayRangeInfo[stringNum].color;
+        }
+        gp_displayRangeInfo[stringNum].displayNumber = newDisplayNum;
     }
-    gp_displayRangeInfo[stringNum].displayNumber = newDisplayNum;
 }
 
 void DisplayDataOnLEDs(uint8_t stringNum)
@@ -326,6 +337,11 @@ void DisplayDataOnLEDs(uint8_t stringNum)
                 }
             }
         }
+    }
+    else
+    {
+        gp_txData[stringNum].stringNumber = stringNum;
+        LatchString((alarm_id_t)0, &gp_txData[stringNum]);
     }
 }
 
