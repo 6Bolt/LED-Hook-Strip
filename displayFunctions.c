@@ -39,7 +39,7 @@ void NumberLEDStrings(uint8_t numberStrings)
     if (gp_rndFlashData == NULL)
         gp_rndFlashData = (RndFlashData *)malloc(COMMANDMAX * sizeof(RndFlashData));
 
-    if (gp_rndFlashData == NULL)
+    if (gp_seqData == NULL)
         gp_seqData = (SeqData *)malloc(COMMANDMAX * sizeof(SeqData));
 
     // Set Up PIO Tx FIFO Buffer Struct
@@ -1083,8 +1083,9 @@ void DoSeq(uint8_t structNum)
 
     if (rangeDisNum == -1)
     {
-        uint16_t waitTime = (gp_seqData[structNum].seqLED * TIMEONELED) + ALEDLATCHTIME;
-        waitTime += gp_seqData[structNum].timeDelay;
+        //uint16_t waitTime = (gp_seqData[structNum].seqLED * TIMEONELED) + ALEDLATCHTIME;
+        //waitTime += gp_seqData[structNum].timeDelay;
+        uint16_t waitTime = gp_seqData[structNum].timeDelay + ALEDLATCHTIME;
 
         // Turn on First LED - Always 8 LEDs or Less
         for (uint16_t i = 0; i < gp_seqData[structNum].seqLED; i++)
