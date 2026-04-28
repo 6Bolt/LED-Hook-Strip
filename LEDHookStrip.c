@@ -179,9 +179,16 @@ volatile bool g_runLEDPattern = false;
 
 // To Know What LED Pattern to Run
 volatile uint8_t g_ledPatternNumber = 0;
+//volatile uint8_t g_ledPatternNumber[LEDSTRINGSMAX] = {0,0,0,0};
 
 // Pattern T number
-volatile int g_tNumber = 0;
+volatile int g_tNumberC0 = 0;
+volatile int g_tNumberC1 = 0;
+
+// Lower Intensity of Light when Running Pattern
+// 0 - Full, 1 - 1/2, 2 - 1/3, 3 - 1/4, 4 - 1/8
+uint8_t g_patternPower = 0;
+//uint8_t g_patternPower[LEDSTRINGSMAX] = {0,0,0,0};
 
 //--------------------------------------------------------------------+
 // Globals - Setting Up In Game
@@ -205,45 +212,153 @@ volatile bool g_DataOnCDC = false;
 
 void pattern_snakes(PIO pio, uint sm, uint len, uint t)
 {
+    uint8_t power = 0xff;
+
+    if(g_patternPower != 0)
+    {
+        if(g_patternPower == 1)
+            power = 0x7f;
+        else if(g_patternPower == 2)
+            power = 0x55;
+        else if(g_patternPower == 3)
+            power = 0x3f;
+        else if(g_patternPower == 4)
+            power = 0x1f;    
+    }
+
     for (uint i = 0; i < len; ++i)
     {
         uint x = (i + (t >> 1)) % 64;
         if (x < 10)
-            pio_sm_put_blocking(pio, sm, SetColor(0xff, 0, 0, 0));
+            pio_sm_put_blocking(pio, sm, SetColor(power, 0, 0, 0));
         else if (x >= 15 && x < 25)
-            pio_sm_put_blocking(pio, sm, SetColor(0, 0xff, 0, 0));
+            pio_sm_put_blocking(pio, sm, SetColor(0, power, 0, 0));
         else if (x >= 30 && x < 40)
-            pio_sm_put_blocking(pio, sm, SetColor(0, 0, 0xff, 0));
+            pio_sm_put_blocking(pio, sm, SetColor(0, 0, power, 0));
         else
             pio_sm_put_blocking(pio, sm, 0);
     }
+}
+
+uint32_t randomColor()
+{
+    uint8_t red, green, blue;
+    uint32_t random = rand();
+    blue = 0x000000ff & random;
+    green = 0x000000ff & (random >> 8);
+    red = 0x000000ff & (random >> 16);
+
+    if(g_patternPower != 0)
+    {
+        if(g_patternPower == 1)
+        {
+            red = (red >> 1);
+            green = (green >> 1);
+            blue = (blue >> 1);
+        }
+        else if(g_patternPower == 2)
+        {
+            red = red / 3;
+            green = green / 3;
+            blue = blue / 3;
+        }
+        else if(g_patternPower == 3)
+        {
+            red = (red >> 2);
+            green = (green >> 2);
+            blue = (blue >> 2);
+        }
+        else if(g_patternPower == 4)
+        {
+            red = (red >> 3);
+            green = (green >> 3);
+            blue = (blue >> 3);
+        }
+    }
+
+    return SetColor(red, green, blue, 0);
 }
 
 void pattern_random(PIO pio, uint sm, uint len, uint t)
 {
     if (t % 8)
         return;
+
     for (uint i = 0; i < len; ++i)
-        pio_sm_put_blocking(pio, sm, rand());
+        pio_sm_put_blocking(pio, sm, randomColor());
 }
 
 void pattern_sparkle(PIO pio, uint sm, uint len, uint t)
 {
     if (t % 8)
         return;
+
+    uint32_t power = 0xffffffff;
+
+    if(g_patternPower != 0)
+    {
+        if(g_patternPower == 1)
+            power = 0x7f7f7f00;
+        else if(g_patternPower == 2)
+            power = 0x55555500;
+        else if(g_patternPower == 3)
+            power = 0x3f3f3f00;
+        else if(g_patternPower == 4)
+            power = 0x1f1f1f00;
+    }    
+    
     for (uint i = 0; i < len; ++i)
-        pio_sm_put_blocking(pio, sm, rand() % 16 ? 0 : 0xffffffff);
+        pio_sm_put_blocking(pio, sm, rand() % 16 ? 0 : power);
 }
 
 void pattern_greys(PIO pio, uint sm, uint len, uint t)
 {
-    uint max = 100; // let's not draw too much current!
+    uint max = 120; // let's not draw too much current!
+    uint powerMax = 120;
+    uint power;
+    uint8_t count = 0;
+    uint8_t countMax = 1;
+
     t %= max;
+
+    if(g_patternPower != 0)
+    {
+        if(g_patternPower == 1)
+        {
+            powerMax = 60;
+            countMax = 2;
+        }
+        else if(g_patternPower == 2)
+        {
+            powerMax = 40;
+            countMax = 3;
+        }
+        else if(g_patternPower == 3)
+        {
+            powerMax = 30;
+            countMax = 4;
+        }
+        else if(g_patternPower == 4)
+        {
+            powerMax = 15;
+            countMax = 8;   
+        }
+
+        power = t / countMax;
+    }
+    else
+        power = t;
+
+    
     for (uint i = 0; i < len; ++i)
     {
-        pio_sm_put_blocking(pio, sm, t * 0x10101);
-        if (++t >= max)
-            t = 0;
+        pio_sm_put_blocking(pio, sm, power * 0x01010100);
+        if(++count >= countMax)
+        {
+            count = 0;
+            if(++power > powerMax)
+                power = 0;
+        }
     }
 }
 
@@ -459,13 +574,13 @@ void core1_mainLoop()
                     patCountTrip1 = false;
                 }
                 
-                for (int i = 0; i < 20; ++i)
+                for (int i = 0; i < 5; ++i)
                 {
-                    pattern_table[g_ledPatternNumber].pat(gp_pio[0], g_sm[0], gp_ledStringElements[0], g_tNumber);
+                    pattern_table[g_ledPatternNumber].pat(gp_pio[0], g_sm[0], gp_ledStringElements[0], g_tNumberC1);
                     if (g_ledStringNumber > 2)
-                        pattern_table[g_ledPatternNumber].pat(gp_pio[2], g_sm[2], gp_ledStringElements[2], g_tNumber);
+                        pattern_table[g_ledPatternNumber].pat(gp_pio[2], g_sm[2], gp_ledStringElements[2], g_tNumberC1);
                     sleep_ms(10);
-                    g_tNumber += dir1;
+                    g_tNumberC1 += dir1;
                     patCount1++;
 
                     if (patCount1 == LEDPATTERNMAX)
@@ -481,7 +596,7 @@ void core1_mainLoop()
                 patRan = false;
             }
 
-            tud_task(); // tinyusb device task, to get CDC Data
+            //tud_task(); // tinyusb device task, to get CDC Data
         }
     }
 }
@@ -560,11 +675,11 @@ int main()
             for (int j = 0; j < 5; ++j)
             {
 
-                pattern_table[g_ledPatternNumber].pat(gp_pio[1], g_sm[1], gp_ledStringElements[1], g_tNumber);
+                pattern_table[g_ledPatternNumber].pat(gp_pio[1], g_sm[1], gp_ledStringElements[1], g_tNumberC0);
                 if (g_ledStringNumber > 3)
-                    pattern_table[g_ledPatternNumber].pat(gp_pio[3], g_sm[3], gp_ledStringElements[3], g_tNumber);
+                    pattern_table[g_ledPatternNumber].pat(gp_pio[3], g_sm[3], gp_ledStringElements[3], g_tNumberC0);
                 sleep_ms(10);
-                g_tNumber += dir;
+                g_tNumberC0 += dir;
                 patCount++;
 
                 if (patCount == LEDPATTERNMAX)
@@ -1062,6 +1177,17 @@ void NoGame(char buf[], uint16_t count)
             }
             break;
 
+        case POWERPATTERN:   // Selects the Power Level of the Pattern
+            if (buf[indexEnd] == ENDCHAR)
+            {
+                uint8_t tempPower = buf[index + 1] - '0';
+
+                //Can Only be 0-4
+                if(tempPower < 5)
+                    g_patternPower = tempPower;
+            }
+            break;
+
         case GAMESTART:  //  When a Supported Game Starts
             if (buf[index + 1] == ENDCHAR && buf[indexEnd] == ENDCHAR)
             {
@@ -1418,7 +1544,8 @@ void GameEnded(void)
     if (g_ledPattern)
         g_runLEDPattern = true;
 
-    g_tNumber = 0;
+    g_tNumberC0 = 0;
+    g_tNumberC1 = 0;
 
     // Clear Out Command Buffer
     g_cmdBufferEXE = 0;

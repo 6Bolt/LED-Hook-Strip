@@ -157,6 +157,8 @@
 // Select What Pattern to Display when Not In a Supported Game
 #define SELECTPATTERN       '@'
 
+// Select Pattern Power Level, which can be 1-5
+#define POWERPATTERN        'P'
 
 
 //--------------------------------------------------------------------+
@@ -422,9 +424,16 @@ extern volatile bool g_runLEDPattern;
 
 // To Know What LED Pattern to Run
 extern volatile uint8_t g_ledPatternNumber;
+//extern volatile uint8_t g_ledPatternNumber[LEDSTRINGSMAX];
 
-// Pattern T number
-extern volatile int g_tNumber;
+// Pattern T numbers for the Cores
+extern volatile int g_tNumberC0;
+extern volatile int g_tNumberC1;
+
+// Lower Intensity of Light when Running Pattern
+// 1 - Full, 2 - 1/2, 3 - 1/3, 4 - 1/4, 5 - 1/8
+extern uint8_t g_patternPower;
+//extern uint8_t g_patternPower[LEDSTRINGSMAX];
 
 
 //--------------------------------------------------------------------+

@@ -1099,16 +1099,12 @@ void DoSeq(uint8_t structNum)
 
     if (rangeDisNum == -1)
     {
-        //uint16_t waitTime = (gp_seqData[structNum].seqLED * TIMEONELED) + ALEDLATCHTIME;
-        //waitTime += gp_seqData[structNum].timeDelay;
-        uint16_t waitTime = gp_seqData[structNum].timeDelay + ALEDLATCHTIME;
-
         // Turn on First LED - Always 8 LEDs or Less
         for (uint16_t i = 0; i < gp_seqData[structNum].seqLED; i++)
             pio_sm_put_blocking(gp_pio[string], g_sm[string], gp_seqData[structNum].color);
 
         // Timer to Turn On Next LED
-        add_alarm_in_us(waitTime, SeqNext, &gp_seqData[structNum], false);
+        add_alarm_in_us(gp_seqData[structNum].timeDelay, SeqNext, &gp_seqData[structNum], false);
     }
     else
     {
@@ -1134,15 +1130,12 @@ int64_t SeqFirst(alarm_id_t id, __unused void *user_data)
     SeqData *seqData = user_data;
     uint8_t string = seqData->stringNumber;
 
-    uint16_t waitTime = (seqData->seqLED * TIMEONELED) + ALEDLATCHTIME;
-    waitTime += seqData->timeDelay;
-
     // Turn on First LED - Always 8 LEDs or Less
     for (uint16_t i = 0; i < seqData->seqLED; i++)
         pio_sm_put_blocking(gp_pio[string], g_sm[string], seqData->color);
 
     // Then Do Next Sequential LED after Delay
-    add_alarm_in_us(waitTime, SeqNext, seqData, false);
+    add_alarm_in_us(seqData->timeDelay, SeqNext, seqData, false);
 
     // Can return a value here in us to fire in the future
     return 0;
